@@ -12,7 +12,7 @@ import zipfile
 import serial
 from time import sleep
 
-import knowledge as kw
+import process_view as pv
 
 from collections import defaultdict
 from io import StringIO
@@ -100,9 +100,9 @@ with detection_graph.as_default():
   with tf.Session(graph=detection_graph) as sess:
 
     print ("Configuring video capture EasyCAP (V4L2) ...")
-    os.system("v4l2-ctl -d /dev/video1 -i 0 -s 5")
+#   os.system("v4l2-ctl -d /dev/video1 -i 0 -s 5")
 
-#    os.system("v4l2-ctl -d /dev/video1 -i 0 -s 0 --set-fmt-video=width=720,height=576")
+#    os.system("v4l2-ctl -d /dev/video1 -i 0 -s 5 --set-fmt-video=width=720,height=576")
 # -d : device (in my case /dev/video0),
 # -i : input. for my Easycap (0 = CVBS0; 1 = CVBS1; 2 = CVBS2; 3 = CVBS3; 4 = CVBS4; 5 = S-VIDEO)
 # -s : norm (0 = PAL_BGHIN; 1 = NTSC_N_443; 2 = PAL_Nc; 3 = NTSC_N; 4 = SECAM; 5 = NTSC_M; 6 = NTSC_M_JP; 7 = PAL_60; 8 = NTSC_443; 9 = PAL_M;)
@@ -110,20 +110,22 @@ with detection_graph.as_default():
 #   screen = cv2.resize(grab_screen(region=(0,40,1280,745)), (WIDTH,HEIGHT))
 #   screen = cv2.resize(grab_screen(region=(0,40,1280,745)), (800,450))
 
-    cap =  cv2.VideoCapture(1)
+#    cap =  cv2.VideoCapture(1)
 
-#   cap =  cv2.VideoCapture('/home/jetson/Descargas/Pedestrians.mp4')
+    cap =  cv2.VideoCapture('/home/jetson/Descargas/Pedestrians.mp4')
 #   cap =  cv2.VideoCapture('/home/jetson/Descargas/VID_20171107_172836.3gp')
 
     fps = cap.get(cv2.CAP_PROP_FPS)
+    if (str(fps)=='nan'):
+       fps=30 
     witch = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
     print ("Frame default resolution: " + str(fps) + " -  " + str(witch) + " - " + str(height))
 
 #---------------------------------------------------------------------------------------------------------#
     #Se define el area de deteccion
-    kw.resolucionImagen(witch,height)
-    kw.creaAreaDetect((witch/2)-200, (witch/2)+200, (height/2)-200, (height/2)+200)
+    pv.resolucionImagen(witch,height)
+    pv.creaAreaDetect((witch/2)-200, (witch/2)+200, (height/2)-200, (height/2)+200)
 
 #---------------------------------------------------------------------------------------------------------#  
     #Se inicia la comunicacion del puerto Serie  
@@ -185,11 +187,13 @@ with detection_graph.as_default():
 
 #### inicio TOMA DE DECISIONES ####
 
-                print(kw.decisionElemento(
+                print(pv.procesaElemento(
                 np.squeeze(boxes),
                 np.squeeze(classes).astype(np.int32),
                 np.squeeze(scores),
-                category_index) )    
+                category_index,
+                image_np )   
+                ) 
        
 #### fin TOMA DE DECISIONES ####             
 
