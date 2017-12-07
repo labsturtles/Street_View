@@ -100,7 +100,7 @@ with detection_graph.as_default():
   with tf.Session(graph=detection_graph) as sess:
 
     print ("Configuring video capture EasyCAP (V4L2) ...")
-#   os.system("v4l2-ctl -d /dev/video1 -i 0 -s 5")
+    os.system("v4l2-ctl -d /dev/video1 -i 0 -s 5")
 
 #    os.system("v4l2-ctl -d /dev/video1 -i 0 -s 5 --set-fmt-video=width=720,height=576")
 # -d : device (in my case /dev/video0),
@@ -110,10 +110,10 @@ with detection_graph.as_default():
 #   screen = cv2.resize(grab_screen(region=(0,40,1280,745)), (WIDTH,HEIGHT))
 #   screen = cv2.resize(grab_screen(region=(0,40,1280,745)), (800,450))
 
-#    cap =  cv2.VideoCapture(1)
+    cap =  cv2.VideoCapture(1)
 
-    cap =  cv2.VideoCapture('/home/jetson/Descargas/Pedestrians.mp4')
-#   cap =  cv2.VideoCapture('/home/jetson/Descargas/VID_20171107_172836.3gp')
+#    cap =  cv2.VideoCapture('/home/jetson/Descargas/Pedestrians.mp4')
+#    cap =  cv2.VideoCapture('/home/jetson/Descargas/VID_20171107_172836.3gp')
 
     fps = cap.get(cv2.CAP_PROP_FPS)
     if (str(fps)=='nan'):
@@ -154,7 +154,7 @@ with detection_graph.as_default():
             if (portOpen==True):
                ser.write(ctrlPad[0].encode())
 
-            if fg>fps/24:
+            if fg>1: #fps/24:
                 fg = 0
 
                 if (timewait==0):

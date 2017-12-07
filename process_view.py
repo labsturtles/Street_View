@@ -6,6 +6,7 @@ height=0
 
 zonadeteccion=kw.elemento("zonadeteccion",0, 0, 0, 0, 0, 0, 0, 0, 0)
 objeto=kw.elemento("none",0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+contenedor=[]
 
 #Guardamos el tamaño de la imagen: ancho, alto
 def resolucionImagen(ancho, alto):
@@ -44,6 +45,7 @@ def procesaElemento(boxes, classes, scores, category_index, image_np):
     
     global objeto
     objeto=kw.elemento("none",0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    contenedor.clear()
 
     min_score_thresh=.5
     max_boxes_to_draw = boxes.shape[0]
@@ -79,7 +81,8 @@ def procesaElemento(boxes, classes, scores, category_index, image_np):
 
                    
                     objeto=kw.elemento(class_name,x1, x2, y1, y2, tam_x, tam_y, med_x, med_y, area, centrox, centroy)
-
+                    #Guarda los objetos en un array
+                    contenedor.append(objeto)
 
                     #Pinta en la imagen el Area definida
                     cv2.rectangle(image_np,(int(zonadeteccion.x1),int(zonadeteccion.y1)),(int(zonadeteccion.x2),int(zonadeteccion.y2)),(0,255,0),3)
@@ -87,12 +90,17 @@ def procesaElemento(boxes, classes, scores, category_index, image_np):
 
 
                     #Pinta en la imagen el centro
-                    cv2.circle(image_np,(int(objeto.centrox),int(objeto.centroy)), 5, (0,0,255), -1)
+                    #cv2.circle(image_np,(int(objeto.centrox),int(objeto.centroy)), 5, (0,0,255), -1)
 
 
-                    return kw.oraculo(zonadeteccion, objeto)
     
+    ## pregunto al oraculo que decision tomar
+    
+#    for e in range(len(contenedor)):
+#         #print(len(contenedor))
+#        objeto=contenedor[e]
+#        print(objeto.nombre)
 
-    return kw.oraculo(zonadeteccion, objeto)		
+    return kw.oraculo(zonadeteccion, contenedor)		
 
 
