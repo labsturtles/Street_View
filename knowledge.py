@@ -20,10 +20,17 @@ class elemento:
         self.centroy = centroy
 
 
-PERSON_MARGEN=0.05#0.15
-CAR_MARGEN=0.05#0.15
-
 zonadeteccion=elemento("zonadeteccion",0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+PERSON_CERCA=zonadeteccion.area*0.05#0.15
+PERSON_MEDIO=zonadeteccion.area*0.25
+PERSON_LEJOS=zonadeteccion.area*0.50
+
+CAR_MARGEN=zonadeteccion.area*0.05#0.15
+CAR_MEDIO=zonadeteccion.area*0.25
+CAR_LEJOS=zonadeteccion.area*0.50
+
+
 
 def cuentaPersonas(contenedor):
     p=0
@@ -37,27 +44,28 @@ def personasIzquierda(contenedor):
     for e in range(len(contenedor)):
         objeto=contenedor[e]
         if (objeto.nombre == 'person'):
-            if (posicionObjeto(objeto, PERSON_MARGEN) == 'IZQUIERDA'):
-                 i=i+1
-    return i
+            if (posicionObjeto(objeto) == 'IZQUIERDA'):
+                if (objeto.area > i):
+                    i=objeto.area
+    return int(i/1000)
 def personasCentro(contenedor):
     c=0
     for e in range(len(contenedor)):
         objeto=contenedor[e]
         if (objeto.nombre == 'person'):
-            if (posicionObjeto(objeto, PERSON_MARGEN) == 'CENTRO'): 
-                 c=c+1
-    return c
+            if (posicionObjeto(objeto) == 'CENTRO'): 
+                if (objeto.area > c):
+                    c=objeto.area
+    return int(c/1000)
 def personasDerecha(contenedor):
     d=0
     for e in range(len(contenedor)):
         objeto=contenedor[e]
         if (objeto.nombre == 'person'):
-            if (posicionObjeto(objeto, PERSON_MARGEN) == 'DERECHA'):
-                 d=d+1
-    return d
-
-
+            if (posicionObjeto(objeto) == 'DERECHA'):
+                if (objeto.area > d):
+                    d=objeto.area
+    return int(d/1000)
 
 def cuentaCoches(contenedor):
     c=0
@@ -71,41 +79,43 @@ def cochesIzquierda(contenedor):
     for e in range(len(contenedor)):
         objeto=contenedor[e]
         if (objeto.nombre == 'car'):
-            if (posicionObjeto(objeto, CAR_MARGEN) == 'IZQUIERDA'):
-                 i=i+1
-    return i
+            if (posicionObjeto(objeto) == 'IZQUIERDA'):
+                if (objeto.area > i):
+                    i=objeto.area
+    return int(i/1000)
 def cochesCentro(contenedor):
     c=0
     for e in range(len(contenedor)):
         objeto=contenedor[e]
         if (objeto.nombre == 'car'):
-            if (posicionObjeto(objeto, CAR_MARGEN) == 'CENTRO'): 
-                 c=c+1
-    return c
+            if (posicionObjeto(objeto) == 'CENTRO'): 
+                if (objeto.area > c):
+                    c=objeto.area
+    return int(c/1000)
 def cochesDerecha(contenedor):
     d=0
     for e in range(len(contenedor)):
         objeto=contenedor[e]
         if (objeto.nombre == 'car'):
-            if (posicionObjeto(objeto, CAR_MARGEN) == 'DERECHA'):
-                 d=d+1
-    return d
+            if (posicionObjeto(objeto) == 'DERECHA'):
+                if (objeto.area > d):
+                    d=objeto.area
+    return int(d/1000)
 
-
-def posicionObjeto(objeto, MARGEN):
-    if  ((objeto.area > zonadeteccion.area*PERSON_MARGEN)and
+def posicionObjeto(objeto):
+    if  (
           (objeto.centroy > zonadeteccion.y1 and objeto.centroy < zonadeteccion.y2) and 
           (objeto.centrox > zonadeteccion.x1 and 
            objeto.centrox < zonadeteccion.x1+((zonadeteccion.x2-zonadeteccion.x1)*(1/3))) 
-         ):
+        ):
             return "IZQUIERDA"
-    elif ((objeto.area > zonadeteccion.area*PERSON_MARGEN) and
+    elif (
          (objeto.centroy > zonadeteccion.y1 and objeto.centroy < zonadeteccion.y2) and 
          (objeto.centrox > zonadeteccion.x1+((zonadeteccion.x2-zonadeteccion.x1)*(1/3)) and 
           objeto.centrox < zonadeteccion.x2 -((zonadeteccion.x2-zonadeteccion.x1)*(1/3)))
          ): 
             return "CENTRO"
-    elif ((objeto.area > zonadeteccion.area*PERSON_MARGEN)and
+    elif (
           (objeto.centroy > zonadeteccion.y1 and objeto.centroy < zonadeteccion.y2) and 
           (objeto.centrox > zonadeteccion.x2 -((zonadeteccion.x2-zonadeteccion.x1)*(1/3)) and 
            objeto.centrox < zonadeteccion.x2 ) 
@@ -119,7 +129,6 @@ def posicionObjeto(objeto, MARGEN):
 ## FUNCION DEL SABER ##
 ## ESTA FUNCION ES LA QUE DECIDE QUE HACER ##
 ##--------------------------------------------------------------------------------------------------------------------##
-
 def oraculo(detectionzone, contenedor):
     global zonadeteccion
 
@@ -139,70 +148,111 @@ def oraculo(detectionzone, contenedor):
     ##--------------------------##
     ##          FUZZY           ##
     ##--------------------------##
-    personas = ctrl.Antecedent(np.arange(0, 1001, 1), 'personas')
-    coches = ctrl.Antecedent(np.arange(0, 1001, 1), 'coches')
-    direccion = ctrl.Consequent(np.arange(0, 2501, 1), 'direccion')
-    
+    izquierda = ctrl.Antecedent(np.arange(0, 101, 1), 'izquierda')
+    centro = ctrl.Antecedent(np.arange(0, 101, 1), 'centro')
+    derecha = ctrl.Antecedent(np.arange(0, 101, 1), 'derecha')
 
-    names = ['left', 'center', 'right']
-    dnames = ['izquierda', 'stop', 'derecha']
-    personas.automf(names=names)
-    coches.automf(names=names)
-    direccion.automf(names=dnames)
+    direccion = ctrl.Consequent(np.arange(0, 181, 1), 'direccion')
+    frenada = ctrl.Consequent(np.arange(0,301, 1), 'frenada')
 
-    direccion['izquierda'] = fuzz.trimf(direccion.universe, [0, 0, 1250])
-    direccion['stop'] = fuzz.trimf(direccion.universe, [0, 1250, 2500])
-    direccion['derecha'] = fuzz.trimf(direccion.universe, [1250, 2500, 2500])
-
+    innames = ['lejos', 'medio', 'cerca']
+    izquierda.automf(names=innames)
+    centro.automf(names=innames)
+    derecha.automf(names=innames)
  
-    rule1 = ctrl.Rule(antecedent=(
-                                    (personas['left'])| 
-                                    (coches['center'] | personas['center'])| 
-                                    (personas['right']) 
+    out_d_names = ['mucho_izquierda', 'medio_izquierda', 'neutro', 'medio_derecha', 'mucho_derecha']
+    direccion.automf(names=out_d_names)
+    direccion['mucho_izquierda'] = fuzz.trimf(direccion.universe, [0, 0, 45])
+    direccion['medio_izquierda'] = fuzz.trimf(direccion.universe, [0, 45, 90])
+    direccion['neutro'] = fuzz.trimf(direccion.universe, [45, 90, 135])
+    direccion['medio_derecha'] = fuzz.trimf(direccion.universe, [90, 135, 180])
+    direccion['mucho_derecha'] = fuzz.trimf(direccion.universe, [135, 180, 180])
+ 
+    out_f_names = ['leve', 'medio', 'fuerte']
+    frenada.automf(names=out_f_names)
+    frenada['leve'] = fuzz.trimf(frenada.universe, [0, 8, 16])
+    frenada['medio'] = fuzz.trimf(frenada.universe, [16, 26, 35])
+    frenada['fuerte'] = fuzz.trimf(frenada.universe, [35, 68, 100])
+
+## ------------------------------------------ //CONTROL VOLANTE\\ ------------------------------------------ ## 
+    d_rule1 = ctrl.Rule(antecedent=(
+                                    (izquierda['cerca'])&(centro['medio']|centro['lejos']) 
                                  ),
-                      consequent=direccion['stop'], label='stop')
+                      consequent=direccion['mucho_derecha'])
                     
-    rule2 = ctrl.Rule(antecedent=(
-                                    (coches['left'])| 
-                                    (personas['center'])| 
-                                    (personas['right'])
+    d_rule2 = ctrl.Rule(antecedent=(
+                                    (izquierda['medio'])&(centro['medio']|centro['lejos'])
                                  ),
-                      consequent=direccion['izquierda'], label='izquierda')
+                      consequent=direccion['medio_derecha'])
 
-    rule3 = ctrl.Rule(antecedent=(
-                                    (personas['left'])| 
-                                    (personas['center'])| 
-                                    (coches['right'])
+    d_rule3 = ctrl.Rule(antecedent=(
+                                    (izquierda['lejos'])| 
+                                    (centro['cerca'])|
+                                    (derecha['lejos'])
                                  ),
-                      consequent=direccion['derecha'], label='derecha')
+                      consequent=direccion['neutro'])
+
+    d_rule4 = ctrl.Rule(antecedent=(
+                                    (derecha['medio'])&(centro['medio']|centro['lejos'])
+                                 ),
+                      consequent=direccion['medio_izquierda'])
+
+    d_rule5 = ctrl.Rule(antecedent=(
+                                    (derecha['cerca'])&(centro['medio']|centro['lejos']) 
+                                 ),
+                      consequent=direccion['mucho_izquierda'])
 
 
-    ctrl_direction= ctrl.ControlSystem(rules=[rule1, rule2, rule3])
-    direction = ctrl.ControlSystemSimulation(ctrl_direction)
+    ctrl_volante= ctrl.ControlSystem(rules=[d_rule1, d_rule2, d_rule3, d_rule4, d_rule5])
+    volante = ctrl.ControlSystemSimulation(ctrl_volante)
 
-    direction.input['personas'] = (personasIzquierda(contenedor)+
-                                personasCentro(contenedor)*10+
-                                personasDerecha(contenedor)*100)
-    direction.input['coches'] =   (cochesIzquierda(contenedor)+
-                                cochesCentro(contenedor)*10+
-                                cochesDerecha(contenedor)*100)
-    direction.compute()
+    volante.input['izquierda'] = (personasIzquierda(contenedor)|cochesIzquierda(contenedor))
+    volante.input['centro']    = (personasCentro(contenedor)|cochesCentro(contenedor))
+    volante.input['derecha']   = (personasDerecha(contenedor)|cochesDerecha(contenedor))
 
-    print("PREDICCION: ")
-    print(direction.output['direccion'])
+    volante.compute()
 
-    print((cochesIzquierda(contenedor)+cochesCentro(contenedor)*10+
-                                cochesDerecha(contenedor)*100))
-    print((personasIzquierda(contenedor)+
-                                personasCentro(contenedor)*10+
-                                personasDerecha(contenedor)*100))
+    print("PREDICCION VOLANTE: ")
+    print(volante.output['direccion'])
+## ------------------------------------------ \\CONTROL VOLANTE// ------------------------------------------ ##
+## --------------------------------------------------------------------------------------------------------- ##
+## ------------------------------------------ //CONTROL FRENADA\\ ------------------------------------------ ##
+    f_rule1 = ctrl.Rule(antecedent=(
+                                    (centro['cerca'])
+                                 ),
+                      consequent=frenada['fuerte'])
+                    
+    f_rule2 = ctrl.Rule(antecedent=(
+                                    (izquierda['medio'])|(centro['medio'])|(derecha['medio'])
+                                 ),
+                      consequent=frenada['medio'])
+
+    f_rule3 = ctrl.Rule(antecedent=(
+                                    (izquierda['lejos'])|(centro['lejos'])|(derecha['lejos'])
+                                 ),
+                      consequent=frenada['leve'])
+
+
+    ctrl_freno= ctrl.ControlSystem(rules=[f_rule1, f_rule2, f_rule3])
+    freno = ctrl.ControlSystemSimulation(ctrl_freno)
+
+    freno.input['izquierda'] = 0#(personasIzquierda(contenedor)|cochesIzquierda(contenedor))
+    freno.input['centro']    = 100#(personasCentro(contenedor)|cochesCentro(contenedor))
+    freno.input['derecha']   = 0#(personasDerecha(contenedor)|cochesDerecha(contenedor))
+
+    freno.compute()
+
+    print("PREDICCION FRENADA: ")
+    print(freno.output['frenada'])
+
+## ------------------------------------------ \\CONTROL FRENADA// ------------------------------------------ ##
 
     return "GO"    
 
 
 
 
-
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ##
 ##-------------------------##
 ## NO SE USA ESTA FUNCION# ##
 ##-------------------------##
