@@ -22,13 +22,13 @@ class elemento:
 
 zonadeteccion=elemento("zonadeteccion",0, 0, 0, 0, 0, 0, 0, 0, 0)
 
-PERSON_CERCA=zonadeteccion.area*0.05#0.15
-PERSON_MEDIO=zonadeteccion.area*0.25
-PERSON_LEJOS=zonadeteccion.area*0.50
+PERSON_CERCA=(zonadeteccion.area/1000)*0.05#0.15
+PERSON_MEDIO=(zonadeteccion.area/1000)*0.25
+PERSON_LEJOS=(zonadeteccion.area/1000)*0.50
 
-CAR_MARGEN=zonadeteccion.area*0.05#0.15
-CAR_MEDIO=zonadeteccion.area*0.25
-CAR_LEJOS=zonadeteccion.area*0.50
+CAR_CERCA=(zonadeteccion.area/1000)*0.05#0.15
+CAR_MEDIO=(zonadeteccion.area/1000)*0.25
+CAR_LEJOS=(zonadeteccion.area/1000)*0.50
 
 
 
@@ -148,67 +148,114 @@ def oraculo(detectionzone, contenedor):
     ##--------------------------##
     ##          FUZZY           ##
     ##--------------------------##
-    izquierda = ctrl.Antecedent(np.arange(0, 101, 1), 'izquierda')
-    centro = ctrl.Antecedent(np.arange(0, 101, 1), 'centro')
-    derecha = ctrl.Antecedent(np.arange(0, 101, 1), 'derecha')
-
-    direccion = ctrl.Consequent(np.arange(0, 181, 1), 'direccion')
-    frenada = ctrl.Consequent(np.arange(0,301, 1), 'frenada')
-
-    innames = ['lejos', 'medio', 'cerca']
-    izquierda.automf(names=innames)
-    centro.automf(names=innames)
-    derecha.automf(names=innames)
+    in_p_names = ['lejos', 'medio', 'cerca']
+    p_izquierda = ctrl.Antecedent(np.arange(0, PERSON_CERCA+1, 1), 'p_izquierda')
+    p_centro = ctrl.Antecedent(np.arange(0, PERSON_CERCA+1, 1), 'p_centro')
+    p_derecha = ctrl.Antecedent(np.arange(0, PERSON_CERCA+1, 1), 'p_derecha')
+    p_izquierda.automf(names=in_p_names)
+    p_centro.automf(names=in_p_names)
+    p_derecha.automf(names=in_p_names)   
+    p_izquierda['lejos'] = p_centro['lejos'] = p_derecha['lejos'] = fuzz.trapmf(p_derecha.universe, [0, 0, (PERSON_LEJOS-(PERSON_LEJOS*0.2)), PERSON_LEJOS])
+    p_izquierda['medio'] = p_centro['medio'] = p_derecha['medio'] = fuzz.trapmf(p_derecha.universe, [(PERSON_LEJOS-(PERSON_LEJOS*0.2)), PERSON_LEJOS, (PERSON_MEDIO-(PERSON_MEDIO*0.4)), PERSON_MEDIO])
+    p_izquierda['cerca'] = p_centro['cerca'] = p_derecha['cerca'] = fuzz.trapmf(p_derecha.universe, [ (PERSON_MEDIO-(PERSON_MEDIO*0.4)), PERSON_MEDIO, PERSON_CERCA, PERSON_CERCA])
+    
+    in_c_names = ['lejos', 'medio', 'cerca']
+    c_izquierda = ctrl.Antecedent(np.arange(0, CAR_CERCA+1, 1), 'c_izquierda')
+    c_centro = ctrl.Antecedent(np.arange(0, CAR_CERCA+1, 1), 'c_centro')
+    c_derecha = ctrl.Antecedent(np.arange(0, CAR_CERCA+1, 1), 'c_derecha')
+    c_izquierda.automf(names=in_c_names)
+    c_centro.automf(names=in_c_names)
+    c_derecha.automf(names=in_c_names)   
+    c_izquierda['lejos'] = c_centro['lejos'] = c_derecha['lejos'] = fuzz.trapmf(c_derecha.universe, [0, 0, (CAR_LEJOS-(CAR_LEJOS*0.2)), CAR_LEJOS])
+    c_izquierda['medio'] = c_centro['medio'] = c_derecha['medio'] = fuzz.trapmf(c_derecha.universe, [(CAR_LEJOS-(CAR_LEJOS*0.2)), CAR_LEJOS, (CAR_MEDIO-(CAR_MEDIO*0.4)), CAR_MEDIO])
+    c_izquierda['cerca'] = c_centro['cerca'] = c_derecha['cerca'] = fuzz.trapmf(c_derecha.universe, [ (CAR_MEDIO-(CAR_MEDIO*0.4)), CAR_MEDIO, CAR_CERCA, CAR_CERCA])
  
+
+
     out_d_names = ['mucho_izquierda', 'medio_izquierda', 'neutro', 'medio_derecha', 'mucho_derecha']
+    direccion = ctrl.Consequent(np.arange(0, 181, 1), 'direccion')
     direccion.automf(names=out_d_names)
-    direccion['mucho_izquierda'] = fuzz.trimf(direccion.universe, [0, 0, 45])
-    direccion['medio_izquierda'] = fuzz.trimf(direccion.universe, [0, 45, 90])
-    direccion['neutro'] = fuzz.trimf(direccion.universe, [45, 90, 135])
-    direccion['medio_derecha'] = fuzz.trimf(direccion.universe, [90, 135, 180])
-    direccion['mucho_derecha'] = fuzz.trimf(direccion.universe, [135, 180, 180])
+    direccion['mucho_izquierda'] = fuzz.trapmf(direccion.universe, [0, 0, 35, 40])
+    direccion['medio_izquierda'] = fuzz.trapmf(direccion.universe, [35, 40, 70, 75])
+    direccion['neutro'] = fuzz.trapmf(direccion.universe, [70, 75, 105, 110])
+    direccion['medio_derecha'] = fuzz.trapmf(direccion.universe, [105, 110, 140, 145])
+    direccion['mucho_derecha'] = fuzz.trapmf(direccion.universe, [140, 145, 180, 180])
  
     out_f_names = ['leve', 'medio', 'fuerte']
+    frenada = ctrl.Consequent(np.arange(0,101, 1), 'frenada')
     frenada.automf(names=out_f_names)
-    frenada['leve'] = fuzz.trimf(frenada.universe, [0, 8, 16])
-    frenada['medio'] = fuzz.trimf(frenada.universe, [16, 26, 35])
-    frenada['fuerte'] = fuzz.trimf(frenada.universe, [35, 68, 100])
+    frenada['leve'] = fuzz.trapmf(frenada.universe, [0, 0, 16, 20])
+    frenada['medio'] = fuzz.trapmf(frenada.universe, [16, 20, 35, 40])
+    frenada['fuerte'] = fuzz.trapmf(frenada.universe, [35, 40, 100, 100])
+
+
 
 ## ------------------------------------------ //CONTROL VOLANTE\\ ------------------------------------------ ## 
     d_rule1 = ctrl.Rule(antecedent=(
-                                    (izquierda['cerca'])&(centro['medio']|centro['lejos']) 
+                                    (p_izquierda['cerca'])&(p_centro['medio']|p_centro['lejos']) 
                                  ),
                       consequent=direccion['mucho_derecha'])
                     
     d_rule2 = ctrl.Rule(antecedent=(
-                                    (izquierda['medio'])&(centro['medio']|centro['lejos'])
+                                    (p_izquierda['medio'])&(p_centro['medio']|p_centro['lejos'])
                                  ),
                       consequent=direccion['medio_derecha'])
 
     d_rule3 = ctrl.Rule(antecedent=(
-                                    (izquierda['lejos'])| 
-                                    (centro['cerca'])|
-                                    (derecha['lejos'])
+                                    ((p_izquierda['lejos']&p_derecha['lejos'])|p_centro['cerca'])
                                  ),
                       consequent=direccion['neutro'])
 
     d_rule4 = ctrl.Rule(antecedent=(
-                                    (derecha['medio'])&(centro['medio']|centro['lejos'])
+                                    (p_derecha['medio'])&(p_centro['medio']|p_centro['lejos'])
                                  ),
                       consequent=direccion['medio_izquierda'])
 
     d_rule5 = ctrl.Rule(antecedent=(
-                                    (derecha['cerca'])&(centro['medio']|centro['lejos']) 
+                                    (p_derecha['cerca'])&(p_centro['medio']|p_centro['lejos']) 
+                                 ),
+                      consequent=direccion['mucho_izquierda'])
+
+    
+    d_rule6 = ctrl.Rule(antecedent=(
+                                    (c_izquierda['cerca'])&(c_centro['medio']|c_centro['lejos']) 
+                                 ),
+                      consequent=direccion['mucho_derecha'])
+                    
+    d_rule7 = ctrl.Rule(antecedent=(
+                                    (c_izquierda['medio'])&(c_centro['medio']|c_centro['lejos'])
+                                 ),
+                      consequent=direccion['medio_derecha'])
+
+    d_rule8 = ctrl.Rule(antecedent=(
+                                    ((c_izquierda['lejos']&c_derecha['lejos'])|c_centro['cerca'])
+                                 ),
+                      consequent=direccion['neutro'])
+
+    d_rule9 = ctrl.Rule(antecedent=(
+                                    (c_derecha['medio'])&(c_centro['medio']|c_centro['lejos'])
+                                 ),
+                      consequent=direccion['medio_izquierda'])
+
+    d_rule10 = ctrl.Rule(antecedent=(
+                                    (p_derecha['cerca'])&(p_centro['medio']|p_centro['lejos']) 
                                  ),
                       consequent=direccion['mucho_izquierda'])
 
 
-    ctrl_volante= ctrl.ControlSystem(rules=[d_rule1, d_rule2, d_rule3, d_rule4, d_rule5])
+
+    ctrl_volante= ctrl.ControlSystem(rules=[d_rule1, d_rule2, d_rule3, d_rule4, d_rule5, 
+                                            d_rule6, d_rule7, d_rule8, d_rule9, d_rule10])
     volante = ctrl.ControlSystemSimulation(ctrl_volante)
 
-    volante.input['izquierda'] = (personasIzquierda(contenedor)|cochesIzquierda(contenedor))
-    volante.input['centro']    = (personasCentro(contenedor)|cochesCentro(contenedor))
-    volante.input['derecha']   = (personasDerecha(contenedor)|cochesDerecha(contenedor))
+
+    volante.input['p_izquierda'] = 10#personasIzquierda(contenedor)
+    volante.input['p_centro']    = 10#personasCentro(contenedor)
+    volante.input['p_derecha']   = 50#personasDerecha(contenedor)
+
+    volante.input['c_izquierda'] = 10#cochesIzquierda(contenedor)
+    volante.input['c_centro']    = 50#cochesCentro(contenedor)
+    volante.input['c_derecha']   = 10#cochesDerecha(contenedor)
 
     volante.compute()
 
@@ -218,27 +265,50 @@ def oraculo(detectionzone, contenedor):
 ## --------------------------------------------------------------------------------------------------------- ##
 ## ------------------------------------------ //CONTROL FRENADA\\ ------------------------------------------ ##
     f_rule1 = ctrl.Rule(antecedent=(
-                                    (centro['cerca'])
+                                    (p_centro['cerca'])
                                  ),
                       consequent=frenada['fuerte'])
                     
     f_rule2 = ctrl.Rule(antecedent=(
-                                    (izquierda['medio'])|(centro['medio'])|(derecha['medio'])
+                                    (p_izquierda['medio'])|(p_centro['medio'])|(p_derecha['medio'])
                                  ),
                       consequent=frenada['medio'])
 
     f_rule3 = ctrl.Rule(antecedent=(
-                                    (izquierda['lejos'])|(centro['lejos'])|(derecha['lejos'])
+                                    (p_izquierda['lejos'])|(p_centro['lejos'])|(p_derecha['lejos'])
+                                 ),
+                      consequent=frenada['leve'])
+    
+    
+    f_rule4 = ctrl.Rule(antecedent=(
+                                    (c_centro['cerca'])
+                                 ),
+                      consequent=frenada['fuerte'])
+    f_rule5 = ctrl.Rule(antecedent=(
+                                    (c_izquierda['medio'])|(c_centro['medio'])|(c_derecha['medio'])
+                                 ),
+                      consequent=frenada['medio'])
+
+    f_rule6 = ctrl.Rule(antecedent=(
+                                    (c_izquierda['lejos'])|(c_centro['lejos'])|(c_derecha['lejos'])
                                  ),
                       consequent=frenada['leve'])
 
 
-    ctrl_freno= ctrl.ControlSystem(rules=[f_rule1, f_rule2, f_rule3])
+
+    ctrl_freno= ctrl.ControlSystem(rules=[f_rule1, f_rule2, f_rule3, 
+                                          f_rule4, f_rule5, f_rule6])
     freno = ctrl.ControlSystemSimulation(ctrl_freno)
 
-    freno.input['izquierda'] = 0#(personasIzquierda(contenedor)|cochesIzquierda(contenedor))
-    freno.input['centro']    = 100#(personasCentro(contenedor)|cochesCentro(contenedor))
-    freno.input['derecha']   = 0#(personasDerecha(contenedor)|cochesDerecha(contenedor))
+
+    freno.input['p_izquierda'] = 10#personasIzquierda(contenedor)
+    freno.input['p_centro']    = 10#personasCentro(contenedor)
+    freno.input['p_derecha']   = 50#personasDerecha(contenedor)
+
+    freno.input['c_izquierda'] = 10#cochesIzquierda(contenedor)
+    freno.input['c_centro']    = 50#cochesCentro(contenedor)
+    freno.input['c_derecha']   = 10#cochesDerecha(contenedor)
+
 
     freno.compute()
 
@@ -247,7 +317,7 @@ def oraculo(detectionzone, contenedor):
 
 ## ------------------------------------------ \\CONTROL FRENADA// ------------------------------------------ ##
 
-    return "GO"    
+    return volante.output['direccion'], freno.output['frenada']
 
 
 
