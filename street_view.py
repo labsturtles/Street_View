@@ -100,7 +100,7 @@ with detection_graph.as_default():
   with tf.Session(graph=detection_graph) as sess:
 
     print ("Configuring video capture EasyCAP (V4L2) ...")
-    os.system("v4l2-ctl -d /dev/video1 -i 0 -s 5")
+    os.system("v4l2-ctl -d /dev/video1 -i 0 -s 5 --set-fmt-video=width=640,height=480")
 
 #    os.system("v4l2-ctl -d /dev/video1 -i 0 -s 5 --set-fmt-video=width=720,height=576")
 # -d : device (in my case /dev/video0),
@@ -156,8 +156,8 @@ with detection_graph.as_default():
     while(cap.isOpened()):
             if (portOpen==True):
                ser.write(ctrlPad[0].encode())
-
-            if fg>1: #fps/24:
+            ret, image_np = cap.read()
+            if fg>0: #fps/24:
                 fg = 0
 
                 if (timewait==0):
@@ -166,7 +166,7 @@ with detection_graph.as_default():
                     timewait-=1
 
 
-                ret, image_np = cap.read()
+                #ret, image_np = cap.read()
                 
 
 		# Expand dimensions since the model expects images to have shape: [1, None, None, 3]
