@@ -164,9 +164,9 @@ def oraculo(detectionzone, contenedor):
     p_izquierda.automf(names=in_p_names)
     p_centro.automf(names=in_p_names)
     p_derecha.automf(names=in_p_names)   
-    p_izquierda['lejos'] = p_centro['lejos'] = p_derecha['lejos'] = fuzz.trapmf(p_derecha.universe, [0, 0, (PERSON_LEJOS-(PERSON_LEJOS*0.2)), PERSON_LEJOS])
-    p_izquierda['medio'] = p_centro['medio'] = p_derecha['medio'] = fuzz.trapmf(p_derecha.universe, [(PERSON_LEJOS-(PERSON_LEJOS*0.2)), PERSON_LEJOS, (PERSON_MEDIO-(PERSON_MEDIO*0.4)), PERSON_MEDIO])
-    p_izquierda['cerca'] = p_centro['cerca'] = p_derecha['cerca'] = fuzz.trapmf(p_derecha.universe, [(PERSON_MEDIO-(PERSON_MEDIO*0.4)), PERSON_MEDIO, PERSON_CERCA, PERSON_CERCA])
+    p_izquierda['lejos'] = p_centro['lejos'] = p_derecha['lejos'] = fuzz.trapmf(p_derecha.universe, [0, 0, (PERSON_LEJOS-2), PERSON_LEJOS])
+    p_izquierda['medio'] = p_centro['medio'] = p_derecha['medio'] = fuzz.trapmf(p_derecha.universe, [(PERSON_LEJOS-2), PERSON_LEJOS, (PERSON_MEDIO-2), PERSON_MEDIO])
+    p_izquierda['cerca'] = p_centro['cerca'] = p_derecha['cerca'] = fuzz.trapmf(p_derecha.universe, [(PERSON_MEDIO-2), PERSON_MEDIO, PERSON_CERCA, PERSON_CERCA])
     
     in_c_names = ['lejos', 'medio', 'cerca']
     c_izquierda = ctrl.Antecedent(np.arange(0, CAR_CERCA+1, 1), 'c_izquierda')
@@ -175,9 +175,9 @@ def oraculo(detectionzone, contenedor):
     c_izquierda.automf(names=in_c_names)
     c_centro.automf(names=in_c_names)
     c_derecha.automf(names=in_c_names)   
-    c_izquierda['lejos'] = c_centro['lejos'] = c_derecha['lejos'] = fuzz.trapmf(c_derecha.universe, [0, 0, (CAR_LEJOS-(CAR_LEJOS*0.2)), CAR_LEJOS])
-    c_izquierda['medio'] = c_centro['medio'] = c_derecha['medio'] = fuzz.trapmf(c_derecha.universe, [(CAR_LEJOS-(CAR_LEJOS*0.2)), CAR_LEJOS, (CAR_MEDIO-(CAR_MEDIO*0.4)), CAR_MEDIO])
-    c_izquierda['cerca'] = c_centro['cerca'] = c_derecha['cerca'] = fuzz.trapmf(c_derecha.universe, [ (CAR_MEDIO-(CAR_MEDIO*0.4)), CAR_MEDIO, CAR_CERCA, CAR_CERCA])
+    c_izquierda['lejos'] = c_centro['lejos'] = c_derecha['lejos'] = fuzz.trapmf(c_derecha.universe, [0, 0, (CAR_LEJOS-2), CAR_LEJOS])
+    c_izquierda['medio'] = c_centro['medio'] = c_derecha['medio'] = fuzz.trapmf(c_derecha.universe, [(CAR_LEJOS-2), CAR_LEJOS, (CAR_MEDIO-2), CAR_MEDIO])
+    c_izquierda['cerca'] = c_centro['cerca'] = c_derecha['cerca'] = fuzz.trapmf(c_derecha.universe, [ (CAR_MEDIO-2), CAR_MEDIO, CAR_CERCA, CAR_CERCA])
  
 
 
