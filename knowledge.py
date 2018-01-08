@@ -126,12 +126,12 @@ def oraculo(detectionzone, contenedor):
 
     zonadeteccion=detectionzone
     PERSON_CERCA=(zonadeteccion.area/1000)*0.10
-    PERSON_MEDIO=(zonadeteccion.area/1000)*0.04
+    PERSON_MEDIO=(zonadeteccion.area/1000)*0.06
     PERSON_LEJOS=(zonadeteccion.area/1000)*0.02
 
     CAR_CERCA=(zonadeteccion.area/1000)*0.20
-    CAR_MEDIO=(zonadeteccion.area/1000)*0.08
-    CAR_LEJOS=(zonadeteccion.area/1000)*0.04
+    CAR_MEDIO=(zonadeteccion.area/1000)*0.12
+    CAR_LEJOS=(zonadeteccion.area/1000)*0.05
 
 
     print("Personas")
@@ -175,9 +175,9 @@ def oraculo(detectionzone, contenedor):
     c_izquierda.automf(names=in_c_names)
     c_centro.automf(names=in_c_names)
     c_derecha.automf(names=in_c_names)   
-    #c_izquierda['lejos'] = c_centro['lejos'] = c_derecha['lejos'] = fuzz.trapmf(c_derecha.universe, [0, 0, (CAR_LEJOS-(CAR_LEJOS*0.2)), CAR_LEJOS])
-    #c_izquierda['medio'] = c_centro['medio'] = c_derecha['medio'] = fuzz.trapmf(c_derecha.universe, [(CAR_LEJOS-(CAR_LEJOS*0.2)), CAR_LEJOS, (CAR_MEDIO-(CAR_MEDIO*0.4)), CAR_MEDIO])
-    #c_izquierda['cerca'] = c_centro['cerca'] = c_derecha['cerca'] = fuzz.trapmf(c_derecha.universe, [ (CAR_MEDIO-(CAR_MEDIO*0.4)), CAR_MEDIO, CAR_CERCA, CAR_CERCA])
+    c_izquierda['lejos'] = c_centro['lejos'] = c_derecha['lejos'] = fuzz.trapmf(c_derecha.universe, [0, 0, (CAR_LEJOS-(CAR_LEJOS*0.2)), CAR_LEJOS])
+    c_izquierda['medio'] = c_centro['medio'] = c_derecha['medio'] = fuzz.trapmf(c_derecha.universe, [(CAR_LEJOS-(CAR_LEJOS*0.2)), CAR_LEJOS, (CAR_MEDIO-(CAR_MEDIO*0.4)), CAR_MEDIO])
+    c_izquierda['cerca'] = c_centro['cerca'] = c_derecha['cerca'] = fuzz.trapmf(c_derecha.universe, [ (CAR_MEDIO-(CAR_MEDIO*0.4)), CAR_MEDIO, CAR_CERCA, CAR_CERCA])
  
 
 
@@ -247,7 +247,7 @@ def oraculo(detectionzone, contenedor):
                       consequent=direccion['medio_izquierda'])
 
     d_rule10 = ctrl.Rule(antecedent=(
-                                    (p_derecha['cerca'])&(p_centro['medio']|p_centro['lejos']) 
+                                    (c_derecha['cerca'])&(c_centro['medio']|c_centro['lejos']) 
                                  ),
                       consequent=direccion['mucho_izquierda'])
 
@@ -274,7 +274,7 @@ def oraculo(detectionzone, contenedor):
 ## --------------------------------------------------------------------------------------------------------- ##
 ## ------------------------------------------ //CONTROL FRENADA\\ ------------------------------------------ ##
     f_rule1 = ctrl.Rule(antecedent=(
-                                    (p_centro['cerca'])
+                                    (p_izquierda['cerca'])|(p_centro['cerca'])|(p_derecha['cerca'])
                                  ),
                       consequent=frenada['fuerte'])
                     
@@ -290,7 +290,7 @@ def oraculo(detectionzone, contenedor):
     
     
     f_rule4 = ctrl.Rule(antecedent=(
-                                    (c_centro['cerca'])
+                                    (c_izquierda['cerca'])|(c_centro['cerca'])|(c_derecha['cerca'])
                                  ),
                       consequent=frenada['fuerte'])
     f_rule5 = ctrl.Rule(antecedent=(
