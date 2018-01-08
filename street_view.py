@@ -111,7 +111,10 @@ with detection_graph.as_default():
 #   screen = cv2.resize(grab_screen(region=(0,40,1280,745)), (800,450))
 
     cap =  cv2.VideoCapture(1)
-
+    #LOW: 240x320  MEDIUM: 320x480  HIGH 480x640
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
+    
 #    cap =  cv2.VideoCapture('/home/jetson/Descargas/Pedestrians.mp4')
 #    cap =  cv2.VideoCapture('/home/jetson/Descargas/VID_20171107_172836.3gp')
 
@@ -164,7 +167,7 @@ with detection_graph.as_default():
 
 
                 ret, image_np = cap.read()
-
+                
 
 		# Expand dimensions since the model expects images to have shape: [1, None, None, 3]
                 image_np_expanded = np.expand_dims(image_np, axis=0)
