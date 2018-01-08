@@ -22,14 +22,6 @@ class elemento:
 
 zonadeteccion=elemento("zonadeteccion",0, 0, 0, 0, 0, 0, 0, 0, 0)
 
-PERSON_CERCA=(zonadeteccion.area/1000)*0.05#0.15
-PERSON_MEDIO=(zonadeteccion.area/1000)*0.25
-PERSON_LEJOS=(zonadeteccion.area/1000)*0.50
-
-CAR_CERCA=(zonadeteccion.area/1000)*0.05#0.15
-CAR_MEDIO=(zonadeteccion.area/1000)*0.25
-CAR_LEJOS=(zonadeteccion.area/1000)*0.50
-
 
 
 def cuentaPersonas(contenedor):
@@ -133,17 +125,34 @@ def oraculo(detectionzone, contenedor):
     global zonadeteccion
 
     zonadeteccion=detectionzone
+    PERSON_CERCA=(zonadeteccion.area/1000)*0.10
+    PERSON_MEDIO=(zonadeteccion.area/1000)*0.04
+    PERSON_LEJOS=(zonadeteccion.area/1000)*0.02
+
+    CAR_CERCA=(zonadeteccion.area/1000)*0.20
+    CAR_MEDIO=(zonadeteccion.area/1000)*0.08
+    CAR_LEJOS=(zonadeteccion.area/1000)*0.04
+
+
     print("Personas")
     print(cuentaPersonas(contenedor))
     print(personasIzquierda(contenedor))
     print(personasCentro(contenedor))
     print(personasDerecha(contenedor))
+    print(zonadeteccion.area)
+    print(PERSON_CERCA)
+    print(PERSON_MEDIO)
+    print(PERSON_LEJOS)
+
     print("Coches")
     print(cuentaCoches(contenedor))
     print(cochesIzquierda(contenedor))
     print(cochesCentro(contenedor))
     print(cochesDerecha(contenedor))
-
+    print(zonadeteccion.area)
+    print(CAR_CERCA)
+    print(CAR_MEDIO)
+    print(CAR_LEJOS)
 
     ##--------------------------##
     ##          FUZZY           ##
@@ -157,7 +166,7 @@ def oraculo(detectionzone, contenedor):
     p_derecha.automf(names=in_p_names)   
     p_izquierda['lejos'] = p_centro['lejos'] = p_derecha['lejos'] = fuzz.trapmf(p_derecha.universe, [0, 0, (PERSON_LEJOS-(PERSON_LEJOS*0.2)), PERSON_LEJOS])
     p_izquierda['medio'] = p_centro['medio'] = p_derecha['medio'] = fuzz.trapmf(p_derecha.universe, [(PERSON_LEJOS-(PERSON_LEJOS*0.2)), PERSON_LEJOS, (PERSON_MEDIO-(PERSON_MEDIO*0.4)), PERSON_MEDIO])
-    p_izquierda['cerca'] = p_centro['cerca'] = p_derecha['cerca'] = fuzz.trapmf(p_derecha.universe, [ (PERSON_MEDIO-(PERSON_MEDIO*0.4)), PERSON_MEDIO, PERSON_CERCA, PERSON_CERCA])
+    p_izquierda['cerca'] = p_centro['cerca'] = p_derecha['cerca'] = fuzz.trapmf(p_derecha.universe, [(PERSON_MEDIO-(PERSON_MEDIO*0.4)), PERSON_MEDIO, PERSON_CERCA, PERSON_CERCA])
     
     in_c_names = ['lejos', 'medio', 'cerca']
     c_izquierda = ctrl.Antecedent(np.arange(0, CAR_CERCA+1, 1), 'c_izquierda')
@@ -166,9 +175,9 @@ def oraculo(detectionzone, contenedor):
     c_izquierda.automf(names=in_c_names)
     c_centro.automf(names=in_c_names)
     c_derecha.automf(names=in_c_names)   
-    c_izquierda['lejos'] = c_centro['lejos'] = c_derecha['lejos'] = fuzz.trapmf(c_derecha.universe, [0, 0, (CAR_LEJOS-(CAR_LEJOS*0.2)), CAR_LEJOS])
-    c_izquierda['medio'] = c_centro['medio'] = c_derecha['medio'] = fuzz.trapmf(c_derecha.universe, [(CAR_LEJOS-(CAR_LEJOS*0.2)), CAR_LEJOS, (CAR_MEDIO-(CAR_MEDIO*0.4)), CAR_MEDIO])
-    c_izquierda['cerca'] = c_centro['cerca'] = c_derecha['cerca'] = fuzz.trapmf(c_derecha.universe, [ (CAR_MEDIO-(CAR_MEDIO*0.4)), CAR_MEDIO, CAR_CERCA, CAR_CERCA])
+    #c_izquierda['lejos'] = c_centro['lejos'] = c_derecha['lejos'] = fuzz.trapmf(c_derecha.universe, [0, 0, (CAR_LEJOS-(CAR_LEJOS*0.2)), CAR_LEJOS])
+    #c_izquierda['medio'] = c_centro['medio'] = c_derecha['medio'] = fuzz.trapmf(c_derecha.universe, [(CAR_LEJOS-(CAR_LEJOS*0.2)), CAR_LEJOS, (CAR_MEDIO-(CAR_MEDIO*0.4)), CAR_MEDIO])
+    #c_izquierda['cerca'] = c_centro['cerca'] = c_derecha['cerca'] = fuzz.trapmf(c_derecha.universe, [ (CAR_MEDIO-(CAR_MEDIO*0.4)), CAR_MEDIO, CAR_CERCA, CAR_CERCA])
  
 
 
@@ -249,13 +258,13 @@ def oraculo(detectionzone, contenedor):
     volante = ctrl.ControlSystemSimulation(ctrl_volante)
 
 
-    volante.input['p_izquierda'] = 10#personasIzquierda(contenedor)
-    volante.input['p_centro']    = 10#personasCentro(contenedor)
-    volante.input['p_derecha']   = 50#personasDerecha(contenedor)
+    volante.input['p_izquierda'] = personasIzquierda(contenedor)
+    volante.input['p_centro']    = personasCentro(contenedor)
+    volante.input['p_derecha']   = personasDerecha(contenedor)
 
-    volante.input['c_izquierda'] = 10#cochesIzquierda(contenedor)
-    volante.input['c_centro']    = 50#cochesCentro(contenedor)
-    volante.input['c_derecha']   = 10#cochesDerecha(contenedor)
+    volante.input['c_izquierda'] = cochesIzquierda(contenedor)
+    volante.input['c_centro']    = cochesCentro(contenedor)
+    volante.input['c_derecha']   = cochesDerecha(contenedor)
 
     volante.compute()
 
@@ -301,13 +310,13 @@ def oraculo(detectionzone, contenedor):
     freno = ctrl.ControlSystemSimulation(ctrl_freno)
 
 
-    freno.input['p_izquierda'] = 10#personasIzquierda(contenedor)
-    freno.input['p_centro']    = 10#personasCentro(contenedor)
-    freno.input['p_derecha']   = 50#personasDerecha(contenedor)
+    freno.input['p_izquierda'] = personasIzquierda(contenedor)
+    freno.input['p_centro']    = personasCentro(contenedor)
+    freno.input['p_derecha']   = personasDerecha(contenedor)
 
-    freno.input['c_izquierda'] = 10#cochesIzquierda(contenedor)
-    freno.input['c_centro']    = 50#cochesCentro(contenedor)
-    freno.input['c_derecha']   = 10#cochesDerecha(contenedor)
+    freno.input['c_izquierda'] = cochesIzquierda(contenedor)
+    freno.input['c_centro']    = cochesCentro(contenedor)
+    freno.input['c_derecha']   = cochesDerecha(contenedor)
 
 
     freno.compute()
@@ -327,6 +336,9 @@ def oraculo(detectionzone, contenedor):
 ## NO SE USA ESTA FUNCION# ##
 ##-------------------------##
 def P_oraculo(zonadeteccion, contenedor):
+
+    CAR_MARGEN=0
+    PERSON_MARGEN=0
 
 #DECISION REFERENTE A PERSONAS
     if ((objeto.nombre == 'person') and 
