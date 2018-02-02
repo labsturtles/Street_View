@@ -1,3 +1,4 @@
+from __future__ import division
 import knowledge as kw
 import cv2
 
@@ -8,7 +9,7 @@ zonadeteccion=kw.elemento("zonadeteccion",0, 0, 0, 0, 0, 0, 0, 0, 0)
 objeto=kw.elemento("none",0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 contenedor=[]
 
-#Guardamos el tamaño de la imagen: ancho, alto
+#Guardamos el tamanno de la imagen: ancho, alto
 def resolucionImagen(ancho, alto):
     global width 
     global height
@@ -16,7 +17,7 @@ def resolucionImagen(ancho, alto):
     height = alto
 
 #Creamos el area de deteccion, donde se interactuara con los resultados
-#Se le pasa como parametros el tamaño del cuadro deteccion: esquina superior izquieda, esquina inferior derecha
+#Se le pasa como parametros el tamanno del cuadro deteccion: esquina superior izquieda, esquina inferior derecha
 def creaAreaDetect(x1, x2, y1, y2):
     
     tam_x=(x2-x1)
@@ -45,7 +46,8 @@ def procesaElemento(boxes, classes, scores, category_index, image_np):
     
     global objeto
     objeto=kw.elemento("none",0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-    contenedor.clear()
+    #contenedor.clear()
+    del contenedor[:]
 
     min_score_thresh=.5
     max_boxes_to_draw = boxes.shape[0]
@@ -54,7 +56,7 @@ def procesaElemento(boxes, classes, scores, category_index, image_np):
               box = tuple(boxes[i].tolist())
               #print(box)
 
-              #Se extrae la posicion del objeto y tamaño
+              #Se extrae la posicion del objeto y tamanno
               x1=box[1]*width
               x2=box[3]*width
               y1=box[0]*height
@@ -87,7 +89,7 @@ def procesaElemento(boxes, classes, scores, category_index, image_np):
                     #Pinta en la imagen el Area definida
                     cv2.rectangle(image_np,(int(zonadeteccion.x1),int(zonadeteccion.y1)),(int(zonadeteccion.x2),int(zonadeteccion.y2)),(0,255,0),3)
                     cv2.rectangle(image_np,(int(zonadeteccion.x1+((zonadeteccion.x2-zonadeteccion.x1)*(1/3))),int(zonadeteccion.y1)),(int(zonadeteccion.x2-((zonadeteccion.x2-zonadeteccion.x1)*(1/3))),int(zonadeteccion.y2)),(0,255,0),3)
-
+                    
 
                     #Pinta en la imagen el centro
                     #cv2.circle(image_np,(int(objeto.centrox),int(objeto.centroy)), 5, (0,0,255), -1)

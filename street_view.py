@@ -1,6 +1,7 @@
+#!/usr/bin/python
 # coding: utf-8
 #alu.21406@usj.es
-
+from __future__ import division
 import numpy as np
 import os
 import six.moves.urllib as urllib
@@ -21,6 +22,9 @@ from PIL import Image
 
 #from grabscreen import grab_screen
 import cv2
+
+#Select GPU
+#os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 # This is needed since the notebook is stored in the object_detection folder.
 sys.path.append("..")
@@ -96,8 +100,12 @@ IMAGE_SIZE = (12, 8)
 #---------------------------------------------------------------------------------------------------------#
 #inicia la captura de imagen con OPENCV 
 print('OPENCV')
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+##config.gpu_options.per_process_gpu_memory_fraction = 0.7
 with detection_graph.as_default():
-  with tf.Session(graph=detection_graph) as sess:
+  with tf.Session(config=config, graph=detection_graph) as sess:
+
 
     print ("Configuring video capture EasyCAP (V4L2) ...")
     os.system("v4l2-ctl -d /dev/video1 -i 0 -s 5 --set-fmt-video=width=640,height=480")
@@ -110,8 +118,10 @@ with detection_graph.as_default():
 #   screen = cv2.resize(grab_screen(region=(0,40,1280,745)), (WIDTH,HEIGHT))
 #   screen = cv2.resize(grab_screen(region=(0,40,1280,745)), (800,450))
 
-    cap =  cv2.VideoCapture(1)
+    cap =  cv2.VideoCapture(1) #4=vf0850
     #LOW: 240x320  MEDIUM: 320x480  HIGH 480x640
+    #if cap.isOpened():
+       #ret, image_np = cap.read()
     cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
     
@@ -136,11 +146,15 @@ with detection_graph.as_default():
     # Q  W  E
     # A  S  D
     # Z  X  C
-    ctrlPad="@"
+    ctrlPad='$@000050505050#'
+    motor=1
+    adas=0
+    direccion=50
+    frenos=90
     timewait=0
     
     try:
-        ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)  # open serial port       
+        ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)  # open serial port       
     except:
         portOpen=False
         pass
@@ -155,19 +169,25 @@ with detection_graph.as_default():
     #while(True):
     while(cap.isOpened()):
             if (portOpen==True):
-               ser.write(ctrlPad[0].encode())
+                ctrlPad='$A0'+str(motor)+str(adas)+'0'+str(direccion)+str(frenos)+'5050#'
+                ser.write(ctrlPad)
+               #ser.write(ctrlPad[0].encode())
             ret, image_np = cap.read()
-            if fg>0: #fps/24:
+            #cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
+            #cap.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
+            if fg>fps/24:
                 fg = 0
 
                 if (timewait==0):
-                    ctrlPad="W"
+                    #ctrlPad='$@100050505050#'
+                    ctrlPad
                 else:
                     timewait-=1
 
 
                 #ret, image_np = cap.read()
                 
+               
 
 		# Expand dimensions since the model expects images to have shape: [1, None, None, 3]
                 image_np_expanded = np.expand_dims(image_np, axis=0)
@@ -182,7 +202,7 @@ with detection_graph.as_default():
                 classes = detection_graph.get_tensor_by_name('detection_classes:0')
                 num_detections = detection_graph.get_tensor_by_name('num_detections:0')
 		
-                # Actual detection.
+                #Actual detection.
                 (boxes, scores, classes, num_detections) = sess.run(
                 [boxes, scores, classes, num_detections],
                 feed_dict={image_tensor: image_np_expanded})
@@ -190,14 +210,40 @@ with detection_graph.as_default():
 
 #### inicio TOMA DE DECISIONES ####
 
-                print(pv.procesaElemento(
+                volante, freno= pv.procesaElemento(
                 np.squeeze(boxes),
                 np.squeeze(classes).astype(np.int32),
                 np.squeeze(scores),
                 category_index,
                 image_np )   
-                ) 
-       
+                
+                print(int(volante)) 
+                print(int(freno)) 
+
+                if(int(volante)<70):
+                       direccion=10
+                       adas=1
+                elif(int(volante)>120):
+                       direccion=90
+                       adas=1
+                else:
+                       direccion=50
+                       adas=0
+
+                if(int(freno)>30):
+                       frenos=10
+                       adas=1
+                elif(int(freno)>12):
+                       frenos=50
+                       adas=1
+                else:
+                       frenos=90
+                       adas=0
+                
+                motor=0
+
+
+                
 #### fin TOMA DE DECISIONES ####             
 
 	       # Visualization of the results of a detection.
@@ -217,7 +263,7 @@ with detection_graph.as_default():
                #      resized = cv2.resize(image_np, dim, interpolation=cv2.INTER_AREA)
                #      cv2.imshow('resized', resized)
                #     cv2.waitKey(0)
-
+                
                 cv2.imshow('window',image_np)
             else:
                 fg += 1

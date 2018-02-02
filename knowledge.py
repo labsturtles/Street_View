@@ -1,4 +1,5 @@
-
+from __future__ import division
+from __future__ import unicode_literals
 import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
@@ -63,14 +64,14 @@ def cuentaCoches(contenedor):
     c=0
     for e in range(len(contenedor)):
         objeto=contenedor[e]
-        if (objeto.nombre == 'car'):
+        if (objeto.nombre == 'car' or objeto.nombre == 'truck'):
             c=c+1
     return c
 def cochesIzquierda(contenedor):
     i=0
     for e in range(len(contenedor)):
         objeto=contenedor[e]
-        if (objeto.nombre == 'car'):
+        if (objeto.nombre == 'car' or objeto.nombre == 'truck'):
             if (posicionObjeto(objeto) == 'IZQUIERDA'):
                 if (objeto.area > i):
                     i=objeto.area
@@ -79,7 +80,7 @@ def cochesCentro(contenedor):
     c=0
     for e in range(len(contenedor)):
         objeto=contenedor[e]
-        if (objeto.nombre == 'car'):
+        if (objeto.nombre == 'car' or objeto.nombre == 'truck'):
             if (posicionObjeto(objeto) == 'CENTRO'): 
                 if (objeto.area > c):
                     c=objeto.area
@@ -88,7 +89,7 @@ def cochesDerecha(contenedor):
     d=0
     for e in range(len(contenedor)):
         objeto=contenedor[e]
-        if (objeto.nombre == 'car'):
+        if (objeto.nombre == 'car' or objeto.nombre == 'truck'):
             if (posicionObjeto(objeto) == 'DERECHA'):
                 if (objeto.area > d):
                     d=objeto.area
